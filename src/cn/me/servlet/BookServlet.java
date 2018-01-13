@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.websocket.Session;
 
+import cn.me.dbutil.PageUtil;
 import cn.me.model.Book;
 import cn.me.service.impl.BookServiceImpl;
 import cn.me.service.impl.SUserServiceImpl;
@@ -42,32 +43,65 @@ public class BookServlet extends HttpServlet {
 			mainPage(request, response);
 		}
 		// 因为点击添加到购物车会有一个带有参数的超链接指向这里
-		if (request.getParameter("param") != null && request.getParameter("param").equals("cart")) {
+		else if (request.getParameter("param") != null && request.getParameter("param").equals("cart")) {
 			System.out.println("进入购物车界面");
 			// 判断session里面是否存在登陆信息
 			cart(request, response);
 
 		}
 		// 执行删除操作，同时处理俩个输入参数
-		if (request.getParameter("param") != null && request.getParameter("param").equals("del")) {
+		else if (request.getParameter("param") != null && request.getParameter("param").equals("del")) {
 			delBook(request, response);
 		}
 
-		if (request.getParameter("param") != null && request.getParameter("param").equals("edit")) {
+		else if (request.getParameter("param") != null && request.getParameter("param").equals("edit")) {
 			editBook(request, response);
 		}
 
 		// 修改保存好的数据
 		// 如何只是在service调用一个方法就可以？这里肯定是向后台传输一个book实例
 		// 如何修改来着？？需要修改原来的值，而不是添加新的值 那就直接使用修改语句那条件是什么
-		if (request.getParameter("param") != null && request.getParameter("param").equals("update")) {
+		else if (request.getParameter("param") != null && request.getParameter("param").equals("update")) {
 			updateBook(request, response);
 		}
 
-		if (request.getParameter("param") != null && request.getParameter("param").equals("add")) {
+		else if (request.getParameter("param") != null && request.getParameter("param").equals("add")) {
 			addBook(request, response);
 		}
 
+		else if (request.getParameter("param") != null && request.getParameter("param").equals("dividePage")) {
+			dividePage(request, response);
+		}
+
+	}
+
+	private void dividePage(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		System.out.println("进入分页");
+
+		int pageNo =1;
+		// 第一次进来pageNo还没有值呢 是不是首先要判断是否为空
+		if (request.getParameter("pageNo") != null) {
+			String pageNoStr = request.getParameter("pageNo");
+			pageNo = Integer.parseInt(pageNoStr);
+			// 分页还是得到一个list，然后将这个转发到showbook页面
+			// 我明白了 是由servlet来处理具体分多少页，每页分多少数据
+			PageUtil<Book> pageUtil = new BookServiceImpl().getPage(pageNo, 3);
+			// 问题是pageutil里面的当前页数如何更新？？ 从哪里更新？？
+			request.setAttribute("pageUtil", pageUtil);
+			// 我觉得这里应该有一个改变工具类里面当前页数语句：
+			request.getRequestDispatcher("/divideBook.jsp").forward(request, response);
+
+		}
+		else {
+			PageUtil<Book> pageUtil = new BookServiceImpl().getPage(pageNo, 3);
+			System.out.println("====");
+			// 问题是pageutil里面的当前页数如何更新？？ 从哪里更新？？
+			request.setAttribute("pageUtil", pageUtil);
+			// 我觉得这里应该有一个改变工具类里面当前页数语句：
+			request.getRequestDispatcher("/divideBook.jsp").forward(request, response);
+		}
 	}
 
 	private void mainPage(HttpServletRequest request, HttpServletResponse response)
@@ -77,7 +111,6 @@ public class BookServlet extends HttpServlet {
 		List<Book> list = new ArrayList<>();
 		// 从service得到所有的书籍
 		list = bsi.getAllBook();
-
 		request.setAttribute("blist", list);
 		// 利用转发向jsp页面将书籍列表传输过去
 		request.getRequestDispatcher("/ShowBook.jsp").forward(request, response);
