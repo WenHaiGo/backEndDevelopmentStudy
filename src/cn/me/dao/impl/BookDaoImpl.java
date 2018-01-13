@@ -1,6 +1,7 @@
 package cn.me.dao.impl;
 
 import java.sql.Statement;
+import java.nio.channels.SelectableChannel;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -156,6 +157,77 @@ public class BookDaoImpl implements BookDao {
 			e.printStackTrace();
 		}
 		return flag;
+	}
+
+	// 获取数据库一共有多少条数据 注意这里如果不传入参数的话是不知道将去获取哪一个表的数据
+	@Override
+	public int getTotalNum() {
+
+		conn = DBUtil.getConn();
+		String sql = "select count(*) from book";
+
+		int sum = 0;
+		try {
+
+			stm = conn.createStatement();
+			rs = stm.executeQuery(sql);
+
+			while (rs.next()) {
+				sum = rs.getInt(1);
+			}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		finally {
+			try {
+				DBUtil.DBclose(conn, stm, rs);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return sum;
+	}
+
+	// 得到具体某一页显示多少条数据
+	//到底如何理解泛型？？？
+	@Override
+	public <T> List<T> getPageList(int pageNo, int pageSize) {
+
+		String sql = "select * from book limit ?,?";
+		List<T> blist = new ArrayList<>();
+		conn = DBUtil.getConn();
+		try {
+			pstm = conn.prepareStatement(sql);
+			pstm.setInt(1, (pageNo-1)*pageSize);
+			pstm.setInt(2, pageSize);
+
+			rs = pstm.executeQuery();
+			while (rs.next()) {
+				Book book = new Book();
+				book.setbImg(rs.getString("bimg"));
+				book.setbName(rs.getString("bname"));
+				book.setbPrice(rs.getInt("bprice"));
+				blist.add((T) book);
+
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		finally {
+			try {
+				DBUtil.DBclose(conn, pstm, rs);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return blist;
 	}
 
 }
