@@ -36,6 +36,12 @@ a {
 		<a href="login.jsp"><%=o == null ? "登陆" : o.getUname()%></a> <a
 			href="#">注册</a>
 	</p>
+	
+	<form action="BookServlet?param=findBook" align="center" method="post">
+		<input type="text" name="findBookByName" value="search book name">
+		
+		<input type = "submit" value="查找">
+	</form>
 	<table border="1" align="center">
 		<caption>图书列表</caption>
 		<tr>

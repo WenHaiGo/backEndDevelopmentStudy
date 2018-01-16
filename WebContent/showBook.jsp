@@ -58,6 +58,8 @@ a {
 		<%
 			}
 		%>
+
+		
 	</table>
 	<a href="addBook.jsp">添加图书</a>
 </body>

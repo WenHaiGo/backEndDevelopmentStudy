@@ -73,6 +73,42 @@ public class BookServlet extends HttpServlet {
 			dividePage(request, response);
 		}
 
+		else if (request.getParameter("param") != null && request.getParameter("param").equals("findBook")) {
+			findBookByName(request, response);
+
+		}
+
+	}
+
+	private void findBookByName(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		int pageNo = 1;
+		// 第一次进来pageNo还没有值呢 是不是首先要判断是否为空
+		if (request.getParameter("pageNo") != null) {
+			// 得到传进来的搜索参数  俩次一次是从dividepage里面传进来的，一次是从findbook 传进来的参数
+			String findBookByName = request.getParameter("findBookByName");
+			String pageNoStr = request.getParameter("pageNo");
+			pageNo = Integer.parseInt(pageNoStr);
+			// 分页还是得到一个list，然后将这个转发到showbook页面
+			// 我明白了 是由servlet来处理具体分多少页，每页分多少数据
+			PageUtil<Book> pageUtil = new BookServiceImpl().getFindBookByName(findBookByName, pageNo, 3);
+			// 问题是pageutil里面的当前页数如何更新？？ 从哪里更新？？
+			request.setAttribute("pageUtil", pageUtil);
+			request.setAttribute("findBookByName", findBookByName);
+			// 我觉得这里应该有一个改变工具类里面当前页数语句：
+			request.getRequestDispatcher("/showFindBookPage.jsp").forward(request, response);
+		} else {
+			// 得到传进来的搜索参数
+			String findBookByName = request.getParameter("findBookByName");
+			PageUtil<Book> pageUtil = new BookServiceImpl().getFindBookByName(findBookByName, pageNo, 3);
+			// 问题是pageutil里面的当前页数如何更新？？ 从哪里更新？？
+			request.setAttribute("pageUtil", pageUtil);
+			request.setAttribute("findBookByName", findBookByName);
+			// 我觉得这里应该有一个改变工具类里面当前页数语句：
+			System.out.println(pageUtil.getList().size());
+			request.getRequestDispatcher("/showFindBookPage.jsp").forward(request, response);
+		}
 	}
 
 	private void dividePage(HttpServletRequest request, HttpServletResponse response)
@@ -80,8 +116,9 @@ public class BookServlet extends HttpServlet {
 
 		System.out.println("进入分页");
 
-		int pageNo =1;
-		// 第一次进来pageNo还没有值呢 是不是首先要判断是否为空
+		int pageNo = 1;
+		// 第一次进来epageNo还没有值呢 是不是首先要判断是否为空
+		// 这就是servlet的坏处，由于request必须先有请求才会有值
 		if (request.getParameter("pageNo") != null) {
 			String pageNoStr = request.getParameter("pageNo");
 			pageNo = Integer.parseInt(pageNoStr);
@@ -92,11 +129,8 @@ public class BookServlet extends HttpServlet {
 			request.setAttribute("pageUtil", pageUtil);
 			// 我觉得这里应该有一个改变工具类里面当前页数语句：
 			request.getRequestDispatcher("/divideBook.jsp").forward(request, response);
-
-		}
-		else {
+		} else {
 			PageUtil<Book> pageUtil = new BookServiceImpl().getPage(pageNo, 3);
-			System.out.println("====");
 			// 问题是pageutil里面的当前页数如何更新？？ 从哪里更新？？
 			request.setAttribute("pageUtil", pageUtil);
 			// 我觉得这里应该有一个改变工具类里面当前页数语句：
@@ -113,14 +147,14 @@ public class BookServlet extends HttpServlet {
 		list = bsi.getAllBook();
 		request.setAttribute("blist", list);
 		// 利用转发向jsp页面将书籍列表传输过去
-		request.getRequestDispatcher("/ShowBook.jsp").forward(request, response);
+		request.getRequestDispatcher("/showBook.jsp").forward(request, response);
 	}
 
 	private void cart(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		Object object = request.getSession().getAttribute("login");// 获取session
 		if (object != null) {
 			// 如果session里面有登录信息就转到主界面
-			response.sendRedirect("BookServlet?param=main");
+			response.sendRedirect("BookServlet?param=dividePage");
 			System.out.println(object);
 		} else {
 			// request.getRequestDispatcher("/login.jsp").forward(request, response);

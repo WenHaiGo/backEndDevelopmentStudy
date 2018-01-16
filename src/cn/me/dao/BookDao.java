@@ -47,5 +47,13 @@ public interface BookDao {
 	int getTotalNum();
 	
 	<T> List<T> getPageList(int pageStart,int pageSize);
+	
+	
+	//查询书籍  通过书名来查找
+	List getSelcBook(String SelBook,int pageNo,int pageSize);
+	
+	//增加了级联菜单的实现：
+	List getAddressByPid(int pid);
+	
 
 }

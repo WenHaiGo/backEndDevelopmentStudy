@@ -3,6 +3,7 @@ package cn.me.service;
 import java.util.List;
 
 import cn.me.dbutil.PageUtil;
+import cn.me.model.Address;
 import cn.me.model.Book;
 
 public interface BookService {
@@ -16,8 +17,8 @@ public interface BookService {
 
 	int add(Book book);
 
-	<T> PageUtil<T> getPage(int pageNo,int pageSize);
-	
-	//得到总的页数
-	int totalPage(int pageSize);
+	<T> PageUtil<T> getPage(int pageNo, int pageSize);
+
+	PageUtil<Book> getFindBookByName(String selBook, int pageNo, int pageSize);
+	List<Address> getAddressByPid(int pid);
 }
